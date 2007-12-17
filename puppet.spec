@@ -15,7 +15,6 @@ Source0:        http://reductivelabs.com/downloads/puppet/%{name}-%{version}.tgz
 Source100:        puppet.init
 Source101:        puppetmaster.init
 BuildArch:      noarch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires:	ruby
 Requires:       ruby >= 1.8.1
 Requires:       facter >= 1.1
