@@ -39,7 +39,8 @@ Requires(post): rpm-helper
 Requires(preun):rpm-helper
                 
 %description server
-Provides the central puppet server daemon (puppetmaster) which provides manifests to clients.
+Provides the central puppet server daemon (puppetmaster) which provides
+manifests to clients.
 The server can also function as a certificate authority and file server.
 
 %prep
