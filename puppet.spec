@@ -63,7 +63,7 @@ done
 %{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/sysconfig
 %{__install} -d -m 0755 %{buildroot}%{_initrddir}
 %{__install} -d -m 0755 %{buildroot}%{_defaultdocdir}/%{name}
-%{__install} -d -m 0755 %{buildroot}%{_localstatedir}/%{name}
+%{__install} -d -m 0755 %{buildroot}%{_localstatedir}/lib/%{name}
 %{__install} -d -m 0755 %{buildroot}%{_var}/run/%{name}
 %{__install} -d -m 0755 %{buildroot}%{_logdir}/%{name}
 %{__install} -Dp -m 0755 bin/* %{buildroot}%{_sbindir}
@@ -113,7 +113,7 @@ touch %{buildroot}%{_sysconfdir}/%{name}/puppetd.conf
 rm -rf %{buildroot}
 
 %pre
-%_pre_useradd puppet %{_localstatedir}/%{name} /sbin/nologin 
+%_pre_useradd puppet %{_localstatedir}/lib/%{name} /sbin/nologin 
 
 %post
 %_post_service puppet
@@ -157,7 +157,7 @@ rm -rf %{buildroot}
 # write to them
 %attr(-, %{name}, %{name}) %{_var}/run/%{name}
 %attr(-, %{name}, %{name}) %{_logdir}/%{name}
-%attr(-, %{name}, %{name}) %{_localstatedir}/%{name}
+%attr(-, %{name}, %{name}) %{_localstatedir}/lib/%{name}
 
 %files server
 %defattr(-, root, root, 0755)
