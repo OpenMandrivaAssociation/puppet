@@ -1,6 +1,6 @@
 %define name    puppet
-%define version 0.23.2
-%define release %mkrel 4
+%define version 0.24.5
+%define release %mkrel 1
 
 %define ppconfdir conf/redhat
 
@@ -91,8 +91,10 @@ touch %{buildroot}%{_sysconfdir}/%{name}/puppetd.conf
 
 # install vim syntax file
 %{__install} -d -m 755 %{buildroot}%{_datadir}/vim/syntax
-%{__install} -m 644 ext/vim/puppet.vim %{buildroot}%{_datadir}/vim/syntax
-#FIXME: what to do with ext/vim/filetype.vim ?
+%{__install} -d -m 755 %{buildroot}%{_datadir}/vim/ftdetect
+
+%{__install} -m 644 ext/vim/syntax/puppet.vim %{buildroot}%{_datadir}/vim/syntax
+%{__install} -m 644 ext/vim/ftdetect/puppet.vim %{buildroot}%{_datadir}/vim/ftdetect
 
 # install emacs syntax file
 %{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/emacs/site-start.d
@@ -107,7 +109,7 @@ touch %{buildroot}%{_sysconfdir}/%{name}/puppetd.conf
 
 # Install other ext/* files
 %{__install} -d -m 0755  %{buildroot}%{_datadir}/%{name}/ext
-%{__cp}  -a ext/{module_puppet,puppet-test,ldap,tools} %{buildroot}%{_datadir}/%{name}/ext/
+%{__cp}  -a ext/{module_puppet,puppet-test,ldap} %{buildroot}%{_datadir}/%{name}/ext/
 
 %clean
 rm -rf %{buildroot}
@@ -151,6 +153,7 @@ rm -rf %{buildroot}
 %{_sysconfdir}/emacs/site-start.d/puppet-mode-init.el
 %{_datadir}/emacs/site-lisp/puppet-mode.el
 %{_datadir}/vim/syntax/puppet.vim
+%{_datadir}/vim/ftdetect/puppet.vim
 %{_datadir}/%{name}
 
 # These need to be owned by puppet so the server can
