@@ -1,6 +1,6 @@
 %define name    puppet
 %define version 0.24.5
-%define release %mkrel 1
+%define release %mkrel 2
 
 %define ppconfdir conf/redhat
 
@@ -76,8 +76,8 @@ done
 %{__install} -Dp -m 0644 lib/puppet.rb %{buildroot}%{ruby_sitelibdir}/puppet.rb
 %{__cp} -a lib/puppet/* %{buildroot}%{ruby_sitelibdir}/%{name}
 %{__find} %{buildroot}%{ruby_sitelibdir}/%{name} -type f -perm +ugo+x -print0 | xargs -0 -r %{__chmod} a-x
-%{__install} -Dp -m 0644 %{ppconfdir}/client.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppet
-%{__install} -Dp -m 0644 %{ppconfdir}/server.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetmaster
+%{__install} -Dp -m 0644 %{ppconfdir}/client.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetd
+%{__install} -Dp -m 0644 %{ppconfdir}/server.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetmasterd
 %{__install} -m 755 %{SOURCE100} %{buildroot}%{_initrddir}/puppet
 %{__install} -m 755 %{SOURCE101} %{buildroot}%{_initrddir}/puppetmaster
 %{__install} -Dp -m 0644 %{ppconfdir}/fileserver.conf %{buildroot}%{_sysconfdir}/%{name}/fileserver.conf
