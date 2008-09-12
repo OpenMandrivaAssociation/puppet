@@ -143,7 +143,7 @@ rm -rf %{buildroot}
 %{ruby_sitelibdir}/puppet.rb
 %{ruby_sitelibdir}/%{name}
 %{_initrddir}/puppet
-%config(noreplace) %{_sysconfdir}/sysconfig/puppet
+%config(noreplace) %{_sysconfdir}/sysconfig/puppetd
 %config(noreplace) %{_sysconfdir}/%{name}/puppet.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/puppet
 %ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetd.conf
@@ -170,7 +170,7 @@ rm -rf %{buildroot}
 %{_initrddir}/puppetmaster
 %config(noreplace) %{_sysconfdir}/%{name}/fileserver.conf
 %dir %{_sysconfdir}/puppet/manifests
-%config(noreplace) %{_sysconfdir}/sysconfig/puppetmaster
+%config(noreplace) %{_sysconfdir}/sysconfig/puppetmasterd
 %ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetca.conf
 %ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetmasterd.conf
 
