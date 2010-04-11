@@ -10,8 +10,8 @@ Release:        %{release}
 Summary:        System Automation and Configuration Management Software
 License:        GPLv2+
 Group:          Monitoring
-URL:            http://puppet.reductivelabs.com/
-Source0:        http://reductivelabs.com/downloads/puppet/%{name}-%{version}.tar.gz
+URL:            http://www.puppetlabs.com/
+Source0:        http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
 Source100:        puppet.init
 Source101:        puppetmaster.init
 BuildArch:      noarch
