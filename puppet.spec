@@ -1,6 +1,6 @@
 %define name    puppet
-%define version 0.24.7
-%define release %mkrel 3
+%define version 0.25.4
+%define release %mkrel 1
 
 %define ppconfdir conf/redhat
 
@@ -11,7 +11,7 @@ Summary:        System Automation and Configuration Management Software
 License:        GPLv2+
 Group:          Monitoring
 URL:            http://puppet.reductivelabs.com/
-Source0:        http://reductivelabs.com/downloads/puppet/%{name}-%{version}.tgz
+Source0:        http://reductivelabs.com/downloads/puppet/%{name}-%{version}.tar.gz
 Source100:        puppet.init
 Source101:        puppetmaster.init
 BuildArch:      noarch
@@ -56,26 +56,18 @@ done
 
 %install
 %{__rm} -rf %{buildroot}
-%{__install} -d -m 0755 %{buildroot}%{_sbindir}
-%{__install} -d -m 0755 %{buildroot}%{_bindir}
-%{__install} -d -m 0755 %{buildroot}%{ruby_sitelibdir}/%{name}
+
+ruby install.rb --destdir=%{buildroot} --quick --no-rdoc
+
 %{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}/manifests
-%{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/sysconfig
 %{__install} -d -m 0755 %{buildroot}%{_initrddir}
 %{__install} -d -m 0755 %{buildroot}%{_defaultdocdir}/%{name}
 %{__install} -d -m 0755 %{buildroot}%{_localstatedir}/lib/%{name}
 %{__install} -d -m 0755 %{buildroot}%{_var}/run/%{name}
 %{__install} -d -m 0755 %{buildroot}%{_logdir}/%{name}
-%{__install} -Dp -m 0755 bin/* %{buildroot}%{_sbindir}
-%{__mv} %{buildroot}%{_sbindir}/puppet %{buildroot}%{_bindir}/puppet
-%{__mv} %{buildroot}%{_sbindir}/ralsh %{buildroot}%{_bindir}/ralsh
-%{__mv} %{buildroot}%{_sbindir}/filebucket %{buildroot}%{_bindir}/filebucket
-%{__mv} %{buildroot}%{_sbindir}/puppetdoc %{buildroot}%{_bindir}/puppetdoc
-#FIXME: puppetrun dans puppetmaster ?
-%{__mv} %{buildroot}%{_sbindir}/puppetrun %{buildroot}%{_bindir}/puppetrun
-%{__install} -Dp -m 0644 lib/puppet.rb %{buildroot}%{ruby_sitelibdir}/puppet.rb
-%{__cp} -a lib/puppet/* %{buildroot}%{ruby_sitelibdir}/%{name}
-%{__find} %{buildroot}%{ruby_sitelibdir}/%{name} -type f -perm +ugo+x -print0 | xargs -0 -r %{__chmod} a-x
+
+#%{__find} %{buildroot}%{ruby_sitelibdir}/%{name} -type f -perm +ugo+x -print0 | xargs -0 -r %{__chmod} a-x
+#
 %{__install} -Dp -m 0644 %{ppconfdir}/client.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetd
 %{__install} -Dp -m 0644 %{ppconfdir}/server.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetmasterd
 %{__install} -m 755 %{SOURCE100} %{buildroot}%{_initrddir}/puppet
@@ -89,27 +81,23 @@ touch %{buildroot}%{_sysconfdir}/%{name}/puppetmasterd.conf
 touch %{buildroot}%{_sysconfdir}/%{name}/puppetca.conf
 touch %{buildroot}%{_sysconfdir}/%{name}/puppetd.conf
 
-# install vim syntax file
+## install vim syntax file
 %{__install} -d -m 755 %{buildroot}%{_datadir}/vim/syntax
 %{__install} -d -m 755 %{buildroot}%{_datadir}/vim/ftdetect
 
 %{__install} -m 644 ext/vim/syntax/puppet.vim %{buildroot}%{_datadir}/vim/syntax
 %{__install} -m 644 ext/vim/ftdetect/puppet.vim %{buildroot}%{_datadir}/vim/ftdetect
 
-# install emacs syntax file
+## install emacs syntax file
 %{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/emacs/site-start.d
 %{__install} -d -m 0755 %{buildroot}%{_datadir}/emacs/site-lisp
 %{__install} -m 0644 ext/emacs/puppet-mode-init.el %{buildroot}%{_sysconfdir}/emacs/site-start.d
 %{__install} -m 0644 ext/emacs/puppet-mode.el %{buildroot}%{_datadir}/emacs/site-lisp
 
-# Install logcheck files
+## Install logcheck files
 %{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/logcheck/ignore.d.{server,workstation}
 %{__install} -m 0644 ext/logcheck/puppet %{buildroot}%{_sysconfdir}/logcheck/ignore.d.server/
 %{__install} -m 0644 ext/logcheck/puppet %{buildroot}%{_sysconfdir}/logcheck/ignore.d.workstation/
-
-# Install other ext/* files
-%{__install} -d -m 0755  %{buildroot}%{_datadir}/%{name}/ext
-%{__cp}  -a ext/{module_puppet,puppet-test,ldap} %{buildroot}%{_datadir}/%{name}/ext/
 
 %clean
 rm -rf %{buildroot}
@@ -137,12 +125,21 @@ rm -rf %{buildroot}
 %dir %{_sysconfdir}/puppet
 %{_bindir}/puppet
 %{_bindir}/ralsh
+%{_bindir}/pi
 %{_bindir}/filebucket
 %{_bindir}/puppetdoc
 %{_sbindir}/puppetd
 %{ruby_sitelibdir}/puppet.rb
 %{ruby_sitelibdir}/%{name}
 %{_initrddir}/puppet
+
+%{_mandir}/man8/puppet.*
+%{_mandir}/man8/ralsh.*
+%{_mandir}/man8/pi.*
+%{_mandir}/man8/filebucket.*
+%{_mandir}/man8/puppetdoc.*
+%{_mandir}/man8/puppetd.*
+%{_mandir}/man8/puppet.conf.*
 %config(noreplace) %{_sysconfdir}/sysconfig/puppetd
 %config(noreplace) %{_sysconfdir}/%{name}/puppet.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/puppet
@@ -154,7 +151,6 @@ rm -rf %{buildroot}
 %{_datadir}/emacs/site-lisp/puppet-mode.el
 %{_datadir}/vim/syntax/puppet.vim
 %{_datadir}/vim/ftdetect/puppet.vim
-%{_datadir}/%{name}
 
 # These need to be owned by puppet so the server can
 # write to them
@@ -166,7 +162,8 @@ rm -rf %{buildroot}
 %defattr(-, root, root, 0755)
 %{_sbindir}/puppetmasterd
 %{_sbindir}/puppetca
-%{_bindir}/puppetrun
+%{_sbindir}/puppetrun
+%{_sbindir}/puppetqd
 %{_initrddir}/puppetmaster
 %config(noreplace) %{_sysconfdir}/%{name}/fileserver.conf
 %dir %{_sysconfdir}/puppet/manifests
@@ -174,3 +171,7 @@ rm -rf %{buildroot}
 %ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetca.conf
 %ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetmasterd.conf
 
+%{_mandir}/man8/puppetca.*
+%{_mandir}/man8/puppetrun.*
+%{_mandir}/man8/puppetqd.*
+%{_mandir}/man8/puppetmasterd.*
