@@ -16,7 +16,7 @@ Source100:        puppet.init
 Source101:        puppetmaster.init
 BuildArch:      noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires:	ruby
+BuildRequires:	ruby facter
 Requires:       ruby >= 1.8.1
 Requires:       facter >= 1.1
 Requires(post): rpm-helper
