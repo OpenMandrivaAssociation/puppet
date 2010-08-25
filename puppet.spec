@@ -1,6 +1,6 @@
 %define name    puppet
-%define version 0.25.4
-%define release %mkrel 2
+%define version 2.6.0
+%define release %mkrel 1
 
 %define ppconfdir conf/redhat
 
@@ -139,7 +139,7 @@ rm -rf %{buildroot}
 %{_mandir}/man8/filebucket.*
 %{_mandir}/man8/puppetdoc.*
 %{_mandir}/man8/puppetd.*
-%{_mandir}/man8/puppet.conf.*
+%{_mandir}/man5/puppet.conf.*
 %config(noreplace) %{_sysconfdir}/sysconfig/puppetd
 %config(noreplace) %{_sysconfdir}/%{name}/puppet.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/puppet
