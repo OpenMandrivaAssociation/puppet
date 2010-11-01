@@ -1,5 +1,5 @@
 %define name    puppet
-%define version 2.6.1
+%define version 2.6.2
 %define release %mkrel 1
 
 %define ppconfdir conf/redhat
