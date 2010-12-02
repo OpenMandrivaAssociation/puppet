@@ -1,5 +1,5 @@
 %define name    puppet
-%define version 2.6.3
+%define version 2.6.4
 %define release %mkrel 1
 
 %define ppconfdir conf/redhat
@@ -166,6 +166,7 @@ rm -rf %{buildroot}
 %{_sbindir}/puppetqd
 %{_initrddir}/puppetmaster
 %config(noreplace) %{_sysconfdir}/%{name}/fileserver.conf
+%config(noreplace) %{_sysconfdir}/%{name}/auth.conf
 %dir %{_sysconfdir}/puppet/manifests
 %config(noreplace) %{_sysconfdir}/sysconfig/puppetmasterd
 %ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetca.conf
