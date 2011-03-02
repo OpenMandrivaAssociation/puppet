@@ -1,6 +1,6 @@
 %define name    puppet
-%define version 2.6.4
-%define release %mkrel 2
+%define version 2.6.5
+%define release %mkrel 1
 
 %define ppconfdir conf/redhat
 
@@ -14,7 +14,6 @@ URL:            http://www.puppetlabs.com/
 Source0:        http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
 Source100:        puppet.init
 Source101:        puppetmaster.init
-Patch0:         0001-5081-Revert-Fix-4349-Parsing-with-ignoreimport-true-.patch
 BuildRequires:	ruby facter
 Requires:       ruby >= 1.8.1
 Requires:       facter >= 1.1
@@ -46,7 +45,6 @@ The server can also function as a certificate authority and file server.
 
 %prep
 %setup -q
-%patch0 -p 1
 
 %build
 # Use /usr/bin/ruby directly instead of /usr/bin/env ruby in
@@ -162,6 +160,7 @@ rm -rf %{buildroot}
 
 %files server
 %defattr(-, root, root, 0755)
+%doc ext/rack
 %{_sbindir}/puppetmasterd
 %{_sbindir}/puppetca
 %{_sbindir}/puppetrun
