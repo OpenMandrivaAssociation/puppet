@@ -1,6 +1,6 @@
 %define name    puppet
 %define version 2.6.6
-%define release %mkrel 1
+%define release %mkrel 2
 
 %define ppconfdir conf/redhat
 
@@ -8,7 +8,7 @@ Name:           %{name}
 Version:        %{version}
 Release:        %{release}
 Summary:        System Automation and Configuration Management Software
-License:        GPLv2+
+License:        GPLv2
 Group:          Monitoring
 URL:            http://www.puppetlabs.com/
 Source0:        http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
