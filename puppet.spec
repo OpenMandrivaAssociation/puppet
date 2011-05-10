@@ -1,5 +1,5 @@
 %define name    puppet
-%define version 2.6.7
+%define version 2.6.8
 %define release %mkrel 1
 
 %define ppconfdir conf/redhat
@@ -20,7 +20,7 @@ Requires:       facter >= 1.1
 Requires(post): rpm-helper
 Requires(preun):rpm-helper
 BuildArch:      noarch
-BuildRoot:      %{_tmppath}/%{name}-%{version}
+
 
 %description
 Puppet lets you centrally manage every important aspect of your system using a 
