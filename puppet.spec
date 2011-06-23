@@ -1,5 +1,5 @@
 %define name    puppet
-%define version 2.6.8
+%define version 2.7.1
 %define release %mkrel 1
 
 %define ppconfdir conf/redhat
@@ -8,7 +8,7 @@ Name:           %{name}
 Version:        %{version}
 Release:        %{release}
 Summary:        System Automation and Configuration Management Software
-License:        GPLv2
+License:        Apache License v2
 Group:          Monitoring
 URL:            http://www.puppetlabs.com/
 Source0:        http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
@@ -121,7 +121,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-, root, root, 0755)
-%doc CHANGELOG COPYING LICENSE README examples
+%doc CHANGELOG LICENSE examples
 %dir %{_sysconfdir}/puppet
 %{_bindir}/puppet
 %{_bindir}/ralsh
@@ -140,6 +140,8 @@ rm -rf %{buildroot}
 %{_mandir}/man8/puppetdoc.*
 %{_mandir}/man8/puppetd.*
 %{_mandir}/man5/puppet.conf.*
+%{_mandir}/man8/puppet-*
+ 
 %config(noreplace) %{_sysconfdir}/sysconfig/puppetd
 %config(noreplace) %{_sysconfdir}/%{name}/puppet.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/puppet
