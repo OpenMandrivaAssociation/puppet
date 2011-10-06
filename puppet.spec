@@ -1,25 +1,27 @@
-%define name    puppet
-%define version 2.7.1
-%define release %mkrel 1
+%define name	puppet
+%define version	2.7.1
+%define release	%mkrel 2
 
 %define ppconfdir conf/redhat
 
-Name:           %{name}  
-Version:        %{version}
-Release:        %{release}
-Summary:        System Automation and Configuration Management Software
-License:        Apache License v2
-Group:          Monitoring
-URL:            http://www.puppetlabs.com/
-Source0:        http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
-Source100:        puppet.init
-Source101:        puppetmaster.init
+Name:		%{name} 
+Version:	%{version}
+Release:	%{release}
+Summary:	System Automation and Configuration Management Software
+License:	Apache License v2
+Group:		Monitoring
+URL:		http://www.puppetlabs.com/
+Source0:	http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
+Source100:	puppet.init
+Source101:	puppetmaster.init
 BuildRequires:	ruby facter
-Requires:       ruby >= 1.8.1
-Requires:       facter >= 1.1
-Requires(post): rpm-helper
+Requires:	ruby >= 1.8.1
+Requires:	facter >= 1.1
+Requires:	ruby-activerecord
+Requires:	python-docutils
+Requires(post):	rpm-helper
 Requires(preun):rpm-helper
-BuildArch:      noarch
+BuildArch:	noarch
 
 
 %description
@@ -32,12 +34,12 @@ This package provide the puppet client daemon.
 
 
 %package server
-Group:          Monitoring 
-Summary:        Server for the puppet system management tool
-Requires:       %{name} = %{version}
-Requires(post): rpm-helper
+Group:		Monitoring 
+Summary:	Server for the puppet system management tool
+Requires:	%{name} = %{version}
+Requires(post):	rpm-helper
 Requires(preun):rpm-helper
-                
+ 
 %description server
 Provides the central puppet server daemon (puppetmaster) which provides
 manifests to clients.
@@ -66,8 +68,6 @@ ruby install.rb --destdir=%{buildroot} --quick --no-rdoc
 %{__install} -d -m 0755 %{buildroot}%{_var}/run/%{name}
 %{__install} -d -m 0755 %{buildroot}%{_logdir}/%{name}
 
-#%{__find} %{buildroot}%{ruby_sitelibdir}/%{name} -type f -perm +ugo+x -print0 | xargs -0 -r %{__chmod} a-x
-#
 %{__install} -Dp -m 0644 %{ppconfdir}/client.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetd
 %{__install} -Dp -m 0644 %{ppconfdir}/server.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetmasterd
 %{__install} -m 755 %{SOURCE100} %{buildroot}%{_initrddir}/puppet
