@@ -1,6 +1,6 @@
 %define name	puppet
 %define version	2.7.1
-%define release	%mkrel 2
+%define release	%mkrel 3
 
 %define ppconfdir conf/redhat
 
@@ -17,8 +17,6 @@ Source101:	puppetmaster.init
 BuildRequires:	ruby facter
 Requires:	ruby >= 1.8.1
 Requires:	facter >= 1.1
-Requires:	ruby-activerecord
-Requires:	python-docutils
 Requires(post):	rpm-helper
 Requires(preun):rpm-helper
 BuildArch:	noarch
