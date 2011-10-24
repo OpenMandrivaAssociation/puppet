@@ -1,6 +1,6 @@
 %define name	puppet
-%define version	2.7.1
-%define release	%mkrel 3
+%define version	2.7.6
+%define release	%mkrel 1
 
 %define ppconfdir conf/redhat
 
@@ -128,6 +128,7 @@ rm -rf %{buildroot}
 %{_bindir}/puppetdoc
 %{_sbindir}/puppetd
 %{ruby_sitelibdir}/puppet.rb
+%{ruby_sitelibdir}/semver.rb
 %{ruby_sitelibdir}/%{name}
 %{_initrddir}/puppet
 
