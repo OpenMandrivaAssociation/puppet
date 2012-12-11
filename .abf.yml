@@ -1,4 +1,2 @@
 sources:
-  "puppet-2.7.13.tar.gz:"	29b5ebef72146f3cb94866e337841f85e5e56b90
-  "puppet.init:"	d3933398f8d49293a6cb1b701659e445fa8d0007
-  "puppetmaster.init:"	19d94fd443406a712c70af482827bb4afd5415d5
+  "puppet-2.7.19.tar.gz": 67ecc774adb703ad8b8b9892b0728b4076db0a36

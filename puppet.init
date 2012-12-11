@@ -1,0 +1,119 @@
+#!/bin/sh
+# puppet        Init script for running the puppet client daemon
+#
+# Author:       Duane Griffin <d.griffin@psenterprise.com>
+#               David Lutterkort <dlutter@redhat.com>
+#
+# chkconfig: - 98 02
+#
+# description: Starts the puppetd daemon (for Puppet clients)
+# processname: puppetd
+# config: /etc/sysconfig/puppetd
+
+### BEGIN INIT INFO
+# Provides: puppet
+# Required-Start: $local_fs $network $syslog
+# Should-Start: $named
+# Required-Stop: $network
+# Should-Stop: $named
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Starts the puppetd daemon (for Puppet clients)
+# Description: puppetd is the client for the puppet system management tool.
+#              It enables periodic system configuration checks on which 
+#              it's running.
+### END INIT INFO
+
+# Local variables
+DAEMON_NAME=puppetd
+DAEMON_PROCESS=$DAEMON_NAME
+DAEMON_BINARY=/usr/sbin/$DAEMON_PROCESS
+LOCKFILE=/var/lock/subsys/$DAEMON_PROCESS
+PIDFILE=/var/run/$DAEMON_PROCESS.pid
+
+RETVAL=0
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+# load service configuration
+[ -f /etc/sysconfig/$DAEMON_NAME  ] && . /etc/sysconfig/$DAEMON_NAME
+
+OPTIONS=""
+[ -n "${PUPPET_SERVER}" ] && OPTIONS="--server=${PUPPET_SERVER}"
+[ -n "${PUPPET_LOG}" ] && OPTIONS="${OPTIONS} --logdest=${PUPPET_LOG}"
+[ -n "${PUPPET_PORT}" ] && OPTIONS="${OPTIONS} --port=${PUPPET_PORT}"
+[ -n "${PUPPET_EXTRA_OPTS}" ] && OPTIONS="${OPTIONS} ${PUPPET_EXTRA_OPTS}"
+start() {
+    # Check if it is already running
+    if [ ! -f $LOCKFILE ]; then
+        gprintf "Starting %s daemon: " "$DAEMON_NAME"
+        # use --user to run the daemon under the specified uid
+        daemon $DAEMON_BINARY $OPTIONS $PUPPET_EXTRA_OPTS
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch $LOCKFILE
+	echo
+    fi
+    return $RETVAL
+}
+
+stop() {
+    gprintf "Stopping %s daemon: " "$DAEMON_NAME"
+    killproc $DAEMON_PROCESS
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && rm -f $LOCKFILE
+    echo
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    echo "Reloading $DAEMON_NAME configuration"
+    gprintf "Reloading %s daemon: " "$DAEMON_NAME"
+    killproc $DAEMON_PROCESS -HUP
+    RETVAL=$?
+    echo
+    return $RETVAL    
+}
+
+
+        
+case "$1" in
+    start)
+	start
+	;;
+    stop)
+	stop
+	;;
+    restart)
+	restart
+	;;
+    condrestart|condreload)
+	if [ -f $LOCKFILE ]; then
+	    restart
+	fi
+	;;
+    status)
+    status $DAEMON_PROCESS
+    RETVAL=$?
+	;;
+    reload)
+        reload
+        ;;
+    *)
+       	echo "Usage: $0 {start|stop|restart|reload|condrestart|condreload|status}"
+        RETVAL=1
+	;;
+esac
+
+exit $RETVAL

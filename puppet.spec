@@ -1,5 +1,5 @@
 %define name	puppet
-%define version	2.7.13
+%define version	2.7.19
 %define release	%mkrel 1
 
 %define ppconfdir conf/redhat
@@ -178,3 +178,131 @@ rm -rf %{buildroot}
 %{_mandir}/man8/puppetrun.*
 %{_mandir}/man8/puppetqd.*
 %{_mandir}/man8/puppetmasterd.*
+
+
+%changelog
+* Tue Apr 17 2012 Alexander Khrukin <akhrukin@mandriva.org> 2.7.13-1mdv2012.0
++ Revision: 791425
+- version update 2.7.13
+
+* Thu Mar 15 2012 Alexander Khrukin <akhrukin@mandriva.org> 2.7.12-1
++ Revision: 785052
+- version update 2.7.12
+
+* Tue Feb 14 2012 Bogdano Arendartchuk <bogdano@mandriva.com> 2.7.10-1
++ Revision: 773898
+- updated version 2.7.10 (to fix upstream issue #10269)
+
+* Mon Oct 24 2011 Michael Scherer <misc@mandriva.org> 2.7.6-1
++ Revision: 706103
+- upgrade to 2.7.6
+
+* Thu Oct 06 2011 Michael Scherer <misc@mandriva.org> 2.7.1-3
++ Revision: 703341
+- revert previous commit, no need to add useless requires just for documentation
+
+  + Alexander Barakin <abarakin@mandriva.org>
+    - fix #61042
+
+* Thu Jun 23 2011 Michael Scherer <misc@mandriva.org> 2.7.1-1
++ Revision: 686749
+- update to 2.7.1
+
+* Tue May 10 2011 Sandro Cazzaniga <kharec@mandriva.org> 2.6.8-1
++ Revision: 673207
+- new bugfixe release
+
+* Tue Apr 05 2011 Sandro Cazzaniga <kharec@mandriva.org> 2.6.7-1
++ Revision: 650710
+- new version 2.6.7
+
+* Mon Mar 21 2011 Michael Scherer <misc@mandriva.org> 2.6.6-2
++ Revision: 647415
+- license was changed upstream
+
+* Wed Mar 16 2011 Sandro Cazzaniga <kharec@mandriva.org> 2.6.6-1
++ Revision: 645655
+- new version 2.6.6 (bugfix release)
+
+  + Guillaume Rousse <guillomovitch@mandriva.org>
+    - new version
+    - ship files needed for running puppetmaster with passenger as documentation
+
+* Wed Jan 19 2011 Guillaume Rousse <guillomovitch@mandriva.org> 2.6.4-2
++ Revision: 631707
+- patch0, from upstream: fix syntax parsing with --ignoreimport option
+
+* Thu Dec 02 2010 Michael Scherer <misc@mandriva.org> 2.6.4-1mdv2011.0
++ Revision: 604643
+- update to 2.6.4 ( security fix )
+
+* Mon Nov 29 2010 Michael Scherer <misc@mandriva.org> 2.6.3-1mdv2011.0
++ Revision: 603105
+- update to new version 2.6.3
+
+* Mon Nov 01 2010 Michael Scherer <misc@mandriva.org> 2.6.2-1mdv2011.0
++ Revision: 591482
+- update to new version 2.6.2
+
+* Sat Sep 18 2010 Guillaume Rousse <guillomovitch@mandriva.org> 2.6.1-1mdv2011.0
++ Revision: 579557
+- update to new version 2.6.1
+
+* Wed Aug 25 2010 Michael Scherer <misc@mandriva.org> 2.6.0-1mdv2011.0
++ Revision: 573154
+- update to 2.6.0 version
+- really fix the issue of puppet being killed on log rotation
+
+* Thu Aug 05 2010 Michael Scherer <misc@mandriva.org> 0.25.4-2mdv2011.0
++ Revision: 566099
+- fix initscript so reload do not kill puppet, by sending SIGTERM instead of SIGHUP ( as seen on cooker, but not on my 2010.1 server )
+
+* Mon Apr 12 2010 Michael Scherer <misc@mandriva.org> 0.25.4-1mdv2010.1
++ Revision: 533709
+- fix Url
+- update to 0.25.4
+- use install.rb instead of doing it by hand
+- add man pages
+
+* Thu Jan 21 2010 Michael Scherer <misc@mandriva.org> 0.24.7-3mdv2010.1
++ Revision: 494418
+- fix initscript configuration
+
+* Sun Aug 16 2009 Michael Scherer <misc@mandriva.org> 0.24.7-2mdv2010.0
++ Revision: 416752
+- fix loop on status, patch by roudoudou, bug #40414
+- fix error when no site.pp exist, bug #52895
+
+* Tue Dec 30 2008 Guillaume Rousse <guillomovitch@mandriva.org> 0.24.7-1mdv2009.1
++ Revision: 321401
+- update to new version 0.24.7
+
+* Fri Sep 12 2008 Olivier Thauvin <nanardon@mandriva.org> 0.24.5-2mdv2009.0
++ Revision: 284057
+- fix sysconfig/* filename
+
+* Fri Aug 01 2008 Michael Scherer <misc@mandriva.org> 0.24.5-1mdv2009.0
++ Revision: 259425
+- new version
+
+* Fri Aug 01 2008 Thierry Vignaud <tv@mandriva.org> 0.23.2-4mdv2009.0
++ Revision: 259355
+- rebuild
+
+* Thu Jul 24 2008 Thierry Vignaud <tv@mandriva.org> 0.23.2-3mdv2009.0
++ Revision: 247238
+- rebuild
+- fix description-line-too-long
+- kill re-definition of %%buildroot on Pixel's request
+
+  + Pixel <pixel@mandriva.com>
+    - adapt to %%_localstatedir now being /var instead of /var/lib (#22312)
+
+  + Olivier Blin <blino@mandriva.org>
+    - restore BuildRoot
+
+* Tue Oct 30 2007 Funda Wang <fwang@mandriva.org> 0.23.2-1mdv2008.1
++ Revision: 103930
+- BR ruby
+- import puppet
+
