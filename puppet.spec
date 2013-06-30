@@ -1,12 +1,8 @@
-%define name	puppet
-%define version	2.7.19
-%define release	%mkrel 1
-
 %define ppconfdir conf/redhat
 
-Name:		%{name} 
-Version:	%{version}
-Release:	%{release}
+Name:		puppet 
+Version:	2.7.22
+Release:	1
 Summary:	System Automation and Configuration Management Software
 License:	Apache License v2
 Group:		Monitoring
@@ -55,8 +51,6 @@ for f in bin/* ; do
 done
 
 %install
-%{__rm} -rf %{buildroot}
-
 ruby install.rb --destdir=%{buildroot} --quick --no-rdoc
 
 %{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}/manifests
@@ -96,9 +90,6 @@ touch %{buildroot}%{_sysconfdir}/%{name}/puppetd.conf
 %{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/logcheck/ignore.d.{server,workstation}
 %{__install} -m 0644 ext/logcheck/puppet %{buildroot}%{_sysconfdir}/logcheck/ignore.d.server/
 %{__install} -m 0644 ext/logcheck/puppet %{buildroot}%{_sysconfdir}/logcheck/ignore.d.workstation/
-
-%clean
-rm -rf %{buildroot}
 
 %pre
 %_pre_useradd puppet %{_localstatedir}/lib/%{name} /sbin/nologin 
