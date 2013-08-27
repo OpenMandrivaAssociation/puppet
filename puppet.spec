@@ -1,15 +1,23 @@
 %define ppconfdir conf/redhat
+%define confdir   ext/redhat
+%define puppet_libdir   %{ruby_vendorlibdir}
 
 Name:		puppet 
-Version:	2.7.22
+Version:	3.1.1
 Release:	1
 Summary:	System Automation and Configuration Management Software
 License:	Apache License v2
 Group:		Monitoring
 URL:		http://www.puppetlabs.com/
 Source0:	http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
-Source100:	puppet.init
-Source101:	puppetmaster.init
+Source1:        http://downloads.puppetlabs.com/%{name}/%{name}-%{version}.tar.gz.asc
+Source2:        puppet-nm-dispatcher
+Source3:        puppet-nm-dispatcher.systemd
+# Pulled from upstream, will be released the next time they cut a release from master
+Patch0:         0001-18781-Be-more-tolerant-of-old-clients-in-WEBrick-ser.patch
+# https://projects.puppetlabs.com/issues/18494
+# Ruby 2.0 support
+Patch1:         puppet-ruby2.patch
 BuildRequires:	ruby facter
 Requires:	ruby >= 1.8.1
 Requires:	facter >= 1.1
@@ -41,55 +49,74 @@ The server can also function as a certificate authority and file server.
 
 %prep
 %setup -q
+%patch0 -p1
+%patch1 -p1
+patch -s -p1 < %{confdir}/rundir-perms.patch
 
 %build
-# Use /usr/bin/ruby directly instead of /usr/bin/env ruby in
-#+ executables. Otherwise, initscripts break since pidof can't
-#+ find the right process
-for f in bin/* ; do 
-  sed -i -e '1c#!/usr/bin/ruby' $f
+# Fix some rpmlint complaints
+for f in mac_automount.pp  mcx_dock_absent.pp  mcx_dock_default.pp \
+    mcx_dock_full.pp mcx_dock_invalid.pp mcx_nogroup.pp \
+    mcx_notexists_absent.pp; do
+    sed -i -e'1d' examples/$f
+    chmod a-x examples/$f
 done
+for f in external/nagios.rb relationship.rb; do
+    sed -i -e '1d' lib/puppet/$f
+done
+chmod +x ext/puppet-load.rb ext/regexp_nodes/regexp_nodes.rb
+
 
 %install
-ruby install.rb --destdir=%{buildroot} --quick --no-rdoc
+ruby install.rb --destdir=%{buildroot} --quick --no-rdoc --sitelibdir=%{puppet_libdir}
 
-%{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}/manifests
-%{__install} -d -m 0755 %{buildroot}%{_initrddir}
-%{__install} -d -m 0755 %{buildroot}%{_defaultdocdir}/%{name}
-%{__install} -d -m 0755 %{buildroot}%{_localstatedir}/lib/%{name}
-%{__install} -d -m 0755 %{buildroot}%{_var}/run/%{name}
-%{__install} -d -m 0755 %{buildroot}%{_logdir}/%{name}
+install -d -m0755 %{buildroot}%{_sysconfdir}/puppet/manifests
+install -d -m0755 %{buildroot}%{_datadir}/%{name}/modules
+install -d -m0755 %{buildroot}%{_localstatedir}/lib/puppet
+install -d -m0755 %{buildroot}%{_localstatedir}/run/puppet
+install -d -m0750 %{buildroot}%{_localstatedir}/log/puppet
 
-%{__install} -Dp -m 0644 %{ppconfdir}/client.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetd
-%{__install} -Dp -m 0644 %{ppconfdir}/server.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/puppetmasterd
-%{__install} -m 755 %{SOURCE100} %{buildroot}%{_initrddir}/puppet
-%{__install} -m 755 %{SOURCE101} %{buildroot}%{_initrddir}/puppetmaster
-%{__install} -Dp -m 0644 %{ppconfdir}/fileserver.conf %{buildroot}%{_sysconfdir}/%{name}/fileserver.conf
-%{__install} -Dp -m 0644 %{ppconfdir}/puppet.conf %{buildroot}%{_sysconfdir}/%{name}/puppet.conf
-%{__install} -Dp -m 0644 %{ppconfdir}/logrotate %{buildroot}%{_sysconfdir}/logrotate.d/puppet
-# We need something for these ghosted files, otherwise rpmbuild
-# will complain loudly. They won't be included in the binary packages
-touch %{buildroot}%{_sysconfdir}/%{name}/puppetmasterd.conf
-touch %{buildroot}%{_sysconfdir}/%{name}/puppetca.conf
-touch %{buildroot}%{_sysconfdir}/%{name}/puppetd.conf
+%{__install} -d -m0755  %{buildroot}%{_unitdir}
+install -Dp -m0644 ext/systemd/puppetagent.service %{buildroot}%{_unitdir}/puppetagent.service
+install -Dp -m0644 ext/systemd/puppetmaster.service %{buildroot}%{_unitdir}/puppetmaster.service
 
-## install vim syntax file
-%{__install} -d -m 755 %{buildroot}%{_datadir}/vim/syntax
-%{__install} -d -m 755 %{buildroot}%{_datadir}/vim/ftdetect
+install -Dp -m0644 %{confdir}/fileserver.conf %{buildroot}%{_sysconfdir}/puppet/fileserver.conf
+install -Dp -m0644 %{confdir}/puppet.conf %{buildroot}%{_sysconfdir}/puppet/puppet.conf
+install -Dp -m0644 %{confdir}/logrotate %{buildroot}%{_sysconfdir}/logrotate.d/puppet
 
-%{__install} -m 644 ext/vim/syntax/puppet.vim %{buildroot}%{_datadir}/vim/syntax
-%{__install} -m 644 ext/vim/ftdetect/puppet.vim %{buildroot}%{_datadir}/vim/ftdetect
+# Install a NetworkManager dispatcher script to pickup changes to
+# /etc/resolv.conf and such (https://b.*illa.redhat.com/532085).
+install -Dpv %{SOURCE3} \
+    %{buildroot}%{_sysconfdir}/NetworkManager/dispatcher.d/98-%{name}
 
-## install emacs syntax file
-%{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/emacs/site-start.d
-%{__install} -d -m 0755 %{buildroot}%{_datadir}/emacs/site-lisp
-%{__install} -m 0644 ext/emacs/puppet-mode-init.el %{buildroot}%{_sysconfdir}/emacs/site-start.d
-%{__install} -m 0644 ext/emacs/puppet-mode.el %{buildroot}%{_datadir}/emacs/site-lisp
+# Install the ext/ directory to %%{_datadir}/%%{name}
+install -d %{buildroot}%{_datadir}/%{name}
+cp -a ext/ %{buildroot}%{_datadir}/%{name}
+# emacs and vim bits are installed elsewhere
+rm -rf %{buildroot}%{_datadir}/%{name}/ext/{emacs,vim}
+# remove misc packaging artifacts in source not applicable to rpm
+rm -rf %{buildroot}%{_datadir}/%{name}/ext/{gentoo,freebsd,solaris,suse,windows,osx,ips,debian}
+rm -f %{buildroot}%{_datadir}/%{name}/ext/{build_defaults.yaml,project_data.yaml}
+rm -f %{buildroot}%{_datadir}/%{name}/ext/redhat/*.init
 
-## Install logcheck files
-%{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/logcheck/ignore.d.{server,workstation}
-%{__install} -m 0644 ext/logcheck/puppet %{buildroot}%{_sysconfdir}/logcheck/ignore.d.server/
-%{__install} -m 0644 ext/logcheck/puppet %{buildroot}%{_sysconfdir}/logcheck/ignore.d.workstation/
+# Install emacs mode files
+emacsdir=%{buildroot}%{_datadir}/emacs/site-lisp
+install -Dp -m0644 ext/emacs/puppet-mode.el $emacsdir/puppet-mode.el
+install -Dp -m0644 ext/emacs/puppet-mode-init.el \
+    $emacsdir/site-start.d/puppet-mode-init.el
+
+# Install vim syntax files
+vimdir=%{buildroot}%{_datadir}/vim/vimfiles
+install -Dp -m0644 ext/vim/ftdetect/puppet.vim $vimdir/ftdetect/puppet.vim
+install -Dp -m0644 ext/vim/syntax/puppet.vim $vimdir/syntax/puppet.vim
+
+# Setup tmpfiles.d config
+mkdir -p %{buildroot}%{_sysconfdir}/tmpfiles.d
+echo "D /var/run/%{name} 0755 %{name} %{name} -" > \
+    %{buildroot}%{_sysconfdir}/tmpfiles.d/%{name}.conf
+
+# Create puppet modules directory for puppet module tool
+mkdir -p %{buildroot}%{_sysconfdir}/%{name}/modules
 
 %pre
 %_pre_useradd puppet %{_localstatedir}/lib/%{name} /sbin/nologin 
@@ -107,193 +134,71 @@ touch %{buildroot}%{_sysconfdir}/%{name}/puppetd.conf
 %preun server
 %_preun_service puppetmaster 
 
-
 %files
 %defattr(-, root, root, 0755)
-%doc CHANGELOG LICENSE examples
-%dir %{_sysconfdir}/puppet
+%doc LICENSE README.md examples
 %{_bindir}/puppet
-%{_bindir}/ralsh
-%{_bindir}/pi
-%{_bindir}/filebucket
-%{_bindir}/puppetdoc
-%{_sbindir}/puppetd
-%{ruby_sitelibdir}/puppet.rb
-%{ruby_sitelibdir}/semver.rb
-%{ruby_sitelibdir}/%{name}
-%{_initrddir}/puppet
-
-%{_mandir}/man8/puppet.*
-%{_mandir}/man8/ralsh.*
-%{_mandir}/man8/pi.*
-%{_mandir}/man8/filebucket.*
-%{_mandir}/man8/puppetdoc.*
-%{_mandir}/man8/puppetd.*
-%{_mandir}/man5/puppet.conf.*
-%{_mandir}/man8/puppet-*
- 
-%config(noreplace) %{_sysconfdir}/sysconfig/puppetd
-%config(noreplace) %{_sysconfdir}/%{name}/puppet.conf
+%{_bindir}/extlookup2hiera
+%{puppet_libdir}/*
+%{_unitdir}/puppetagent.service
+%dir %{_sysconfdir}/puppet
+%dir %{_sysconfdir}/%{name}/modules
+%config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
+%config(noreplace) %{_sysconfdir}/puppet/puppet.conf
+%config(noreplace) %{_sysconfdir}/puppet/auth.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/puppet
-%ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetd.conf
-
-%{_sysconfdir}/logcheck/ignore.d.workstation/%{name}
-%{_sysconfdir}/logcheck/ignore.d.server/
-%{_sysconfdir}/emacs/site-start.d/puppet-mode-init.el
-%{_datadir}/emacs/site-lisp/puppet-mode.el
-%{_datadir}/vim/syntax/puppet.vim
-%{_datadir}/vim/ftdetect/puppet.vim
-
+%dir %{_sysconfdir}/NetworkManager
+%dir %{_sysconfdir}/NetworkManager/dispatcher.d
+%{_sysconfdir}/NetworkManager/dispatcher.d/98-puppet
+# We don't want to require emacs or vim, so we need to own these dirs
+%{_datadir}/emacs
+%{_datadir}/vim
+%{_datadir}/%{name}
 # These need to be owned by puppet so the server can
 # write to them
-%attr(-, %{name}, %{name}) %{_var}/run/%{name}
-%attr(-, %{name}, %{name}) %{_logdir}/%{name}
-%attr(-, %{name}, %{name}) %{_localstatedir}/lib/%{name}
+%attr(-, puppet, puppet) %{_localstatedir}/run/puppet
+%attr(0750, puppet, puppet) %{_localstatedir}/log/puppet
+%attr(-, puppet, puppet) %{_localstatedir}/lib/puppet
+%{_mandir}/man5/puppet.conf.5.*
+%{_mandir}/man8/puppet.8.*
+%{_mandir}/man8/puppet-agent.8.*
+%{_mandir}/man8/puppet-apply.8.*
+%{_mandir}/man8/puppet-catalog.8.*
+%{_mandir}/man8/puppet-describe.8.*
+%{_mandir}/man8/puppet-ca.8.*
+%{_mandir}/man8/puppet-cert.8.*
+%{_mandir}/man8/puppet-certificate.8.*
+%{_mandir}/man8/puppet-certificate_request.8.*
+%{_mandir}/man8/puppet-certificate_revocation_list.8.*
+%{_mandir}/man8/puppet-config.8.*
+%{_mandir}/man8/puppet-device.8.*
+%{_mandir}/man8/puppet-doc.8.*
+%{_mandir}/man8/puppet-facts.8.*
+%{_mandir}/man8/puppet-file.8.*
+%{_mandir}/man8/puppet-filebucket.8.*
+%{_mandir}/man8/puppet-help.8.*
+%{_mandir}/man8/puppet-inspect.8.*
+%{_mandir}/man8/puppet-instrumentation_data.8.*
+%{_mandir}/man8/puppet-instrumentation_listener.8.*
+%{_mandir}/man8/puppet-instrumentation_probe.8.*
+%{_mandir}/man8/puppet-key.8.*
+%{_mandir}/man8/puppet-man.8.*
+%{_mandir}/man8/puppet-module.8.*
+%{_mandir}/man8/puppet-node.8.*
+%{_mandir}/man8/puppet-parser.8.*
+%{_mandir}/man8/puppet-plugin.8.*
+%{_mandir}/man8/puppet-report.8.*
+%{_mandir}/man8/puppet-resource.8.*
+%{_mandir}/man8/puppet-resource_type.8.*
+%{_mandir}/man8/puppet-secret_agent.8.*
+%{_mandir}/man8/puppet-status.8.*
+%{_mandir}/man8/extlookup2hiera.8.*
 
 %files server
 %defattr(-, root, root, 0755)
-%doc ext/rack
-%{_sbindir}/puppetmasterd
-%{_sbindir}/puppetca
-%{_sbindir}/puppetrun
-%{_sbindir}/puppetqd
-%{_initrddir}/puppetmaster
-%config(noreplace) %{_sysconfdir}/%{name}/fileserver.conf
-%config(noreplace) %{_sysconfdir}/%{name}/auth.conf
+%{_unitdir}/puppetmaster.service
+%config(noreplace) %{_sysconfdir}/puppet/fileserver.conf
 %dir %{_sysconfdir}/puppet/manifests
-%config(noreplace) %{_sysconfdir}/sysconfig/puppetmasterd
-%ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetca.conf
-%ghost %config(noreplace,missingok) %{_sysconfdir}/%{name}/puppetmasterd.conf
-
-%{_mandir}/man8/puppetca.*
-%{_mandir}/man8/puppetrun.*
-%{_mandir}/man8/puppetqd.*
-%{_mandir}/man8/puppetmasterd.*
-
-
-%changelog
-* Tue Apr 17 2012 Alexander Khrukin <akhrukin@mandriva.org> 2.7.13-1mdv2012.0
-+ Revision: 791425
-- version update 2.7.13
-
-* Thu Mar 15 2012 Alexander Khrukin <akhrukin@mandriva.org> 2.7.12-1
-+ Revision: 785052
-- version update 2.7.12
-
-* Tue Feb 14 2012 Bogdano Arendartchuk <bogdano@mandriva.com> 2.7.10-1
-+ Revision: 773898
-- updated version 2.7.10 (to fix upstream issue #10269)
-
-* Mon Oct 24 2011 Michael Scherer <misc@mandriva.org> 2.7.6-1
-+ Revision: 706103
-- upgrade to 2.7.6
-
-* Thu Oct 06 2011 Michael Scherer <misc@mandriva.org> 2.7.1-3
-+ Revision: 703341
-- revert previous commit, no need to add useless requires just for documentation
-
-  + Alexander Barakin <abarakin@mandriva.org>
-    - fix #61042
-
-* Thu Jun 23 2011 Michael Scherer <misc@mandriva.org> 2.7.1-1
-+ Revision: 686749
-- update to 2.7.1
-
-* Tue May 10 2011 Sandro Cazzaniga <kharec@mandriva.org> 2.6.8-1
-+ Revision: 673207
-- new bugfixe release
-
-* Tue Apr 05 2011 Sandro Cazzaniga <kharec@mandriva.org> 2.6.7-1
-+ Revision: 650710
-- new version 2.6.7
-
-* Mon Mar 21 2011 Michael Scherer <misc@mandriva.org> 2.6.6-2
-+ Revision: 647415
-- license was changed upstream
-
-* Wed Mar 16 2011 Sandro Cazzaniga <kharec@mandriva.org> 2.6.6-1
-+ Revision: 645655
-- new version 2.6.6 (bugfix release)
-
-  + Guillaume Rousse <guillomovitch@mandriva.org>
-    - new version
-    - ship files needed for running puppetmaster with passenger as documentation
-
-* Wed Jan 19 2011 Guillaume Rousse <guillomovitch@mandriva.org> 2.6.4-2
-+ Revision: 631707
-- patch0, from upstream: fix syntax parsing with --ignoreimport option
-
-* Thu Dec 02 2010 Michael Scherer <misc@mandriva.org> 2.6.4-1mdv2011.0
-+ Revision: 604643
-- update to 2.6.4 ( security fix )
-
-* Mon Nov 29 2010 Michael Scherer <misc@mandriva.org> 2.6.3-1mdv2011.0
-+ Revision: 603105
-- update to new version 2.6.3
-
-* Mon Nov 01 2010 Michael Scherer <misc@mandriva.org> 2.6.2-1mdv2011.0
-+ Revision: 591482
-- update to new version 2.6.2
-
-* Sat Sep 18 2010 Guillaume Rousse <guillomovitch@mandriva.org> 2.6.1-1mdv2011.0
-+ Revision: 579557
-- update to new version 2.6.1
-
-* Wed Aug 25 2010 Michael Scherer <misc@mandriva.org> 2.6.0-1mdv2011.0
-+ Revision: 573154
-- update to 2.6.0 version
-- really fix the issue of puppet being killed on log rotation
-
-* Thu Aug 05 2010 Michael Scherer <misc@mandriva.org> 0.25.4-2mdv2011.0
-+ Revision: 566099
-- fix initscript so reload do not kill puppet, by sending SIGTERM instead of SIGHUP ( as seen on cooker, but not on my 2010.1 server )
-
-* Mon Apr 12 2010 Michael Scherer <misc@mandriva.org> 0.25.4-1mdv2010.1
-+ Revision: 533709
-- fix Url
-- update to 0.25.4
-- use install.rb instead of doing it by hand
-- add man pages
-
-* Thu Jan 21 2010 Michael Scherer <misc@mandriva.org> 0.24.7-3mdv2010.1
-+ Revision: 494418
-- fix initscript configuration
-
-* Sun Aug 16 2009 Michael Scherer <misc@mandriva.org> 0.24.7-2mdv2010.0
-+ Revision: 416752
-- fix loop on status, patch by roudoudou, bug #40414
-- fix error when no site.pp exist, bug #52895
-
-* Tue Dec 30 2008 Guillaume Rousse <guillomovitch@mandriva.org> 0.24.7-1mdv2009.1
-+ Revision: 321401
-- update to new version 0.24.7
-
-* Fri Sep 12 2008 Olivier Thauvin <nanardon@mandriva.org> 0.24.5-2mdv2009.0
-+ Revision: 284057
-- fix sysconfig/* filename
-
-* Fri Aug 01 2008 Michael Scherer <misc@mandriva.org> 0.24.5-1mdv2009.0
-+ Revision: 259425
-- new version
-
-* Fri Aug 01 2008 Thierry Vignaud <tv@mandriva.org> 0.23.2-4mdv2009.0
-+ Revision: 259355
-- rebuild
-
-* Thu Jul 24 2008 Thierry Vignaud <tv@mandriva.org> 0.23.2-3mdv2009.0
-+ Revision: 247238
-- rebuild
-- fix description-line-too-long
-- kill re-definition of %%buildroot on Pixel's request
-
-  + Pixel <pixel@mandriva.com>
-    - adapt to %%_localstatedir now being /var instead of /var/lib (#22312)
-
-  + Olivier Blin <blino@mandriva.org>
-    - restore BuildRoot
-
-* Tue Oct 30 2007 Funda Wang <fwang@mandriva.org> 0.23.2-1mdv2008.1
-+ Revision: 103930
-- BR ruby
-- import puppet
-
+%{_mandir}/man8/puppet-kick.8.*
+%{_mandir}/man8/puppet-master.8.*
+%{_mandir}/man8/puppet-queue.8.*

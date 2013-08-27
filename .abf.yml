@@ -1,4 +1,6 @@
 removed_sources:
   puppet-2.7.19.tar.gz: 67ecc774adb703ad8b8b9892b0728b4076db0a36
-sources:
   puppet-2.7.22.tar.gz: bf345ddbb9e44d2145b4d7c1fa48b41cf4dc41c0
+sources:
+  puppet-3.1.1.tar.gz: 7fc2c4bc830cb20ef45261f7ef491a5d3a8c4fec
+  puppet-3.1.1.tar.gz.asc: d39c92e4a8d233d995a25f5f80b74dc4cde05dd5
