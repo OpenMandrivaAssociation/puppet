@@ -2,9 +2,9 @@
 %define confdir   ext/redhat
 %define puppet_libdir   %{ruby_vendorlibdir}
 
-Name:		puppet 
+Name:		puppet
 Version:	3.1.1
-Release:	1
+Release:	2
 Summary:	System Automation and Configuration Management Software
 License:	Apache License v2
 Group:		Monitoring
@@ -122,10 +122,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/modules
 %_pre_useradd puppet %{_localstatedir}/lib/%{name} /sbin/nologin 
 
 %post
-%_post_service puppet
+%_post_service puppetagent
 
 %preun
-%_preun_service puppet 
+%_preun_service puppetagent
 
 
 %post server
