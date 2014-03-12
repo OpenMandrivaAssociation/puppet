@@ -3,21 +3,16 @@
 %define puppet_libdir   %{ruby_vendorlibdir}
 
 Name:		puppet
-Version:	3.1.1
-Release:	2
+Version:	3.4.3
+Release:	1
 Summary:	System Automation and Configuration Management Software
 License:	Apache License v2
 Group:		Monitoring
 URL:		http://www.puppetlabs.com/
-Source0:	http://puppetlabs.com/downloads/puppet/%{name}-%{version}.tar.gz
+Source0:	http://downloads.puppetlabs.com/puppet/%{name}-%{version}.tar.gz
 Source1:        http://downloads.puppetlabs.com/%{name}/%{name}-%{version}.tar.gz.asc
 Source2:        puppet-nm-dispatcher
 Source3:        puppet-nm-dispatcher.systemd
-# Pulled from upstream, will be released the next time they cut a release from master
-Patch0:         0001-18781-Be-more-tolerant-of-old-clients-in-WEBrick-ser.patch
-# https://projects.puppetlabs.com/issues/18494
-# Ruby 2.0 support
-Patch1:         puppet-ruby2.patch
 BuildRequires:	ruby facter
 Requires:	ruby >= 1.8.1
 Requires:	facter >= 1.1
@@ -49,21 +44,8 @@ The server can also function as a certificate authority and file server.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
-patch -s -p1 < %{confdir}/rundir-perms.patch
 
 %build
-# Fix some rpmlint complaints
-for f in mac_automount.pp  mcx_dock_absent.pp  mcx_dock_default.pp \
-    mcx_dock_full.pp mcx_dock_invalid.pp mcx_nogroup.pp \
-    mcx_notexists_absent.pp; do
-    sed -i -e'1d' examples/$f
-    chmod a-x examples/$f
-done
-for f in external/nagios.rb relationship.rb; do
-    sed -i -e '1d' lib/puppet/$f
-done
 chmod +x ext/puppet-load.rb ext/regexp_nodes/regexp_nodes.rb
 
 
@@ -77,7 +59,7 @@ install -d -m0755 %{buildroot}%{_localstatedir}/run/puppet
 install -d -m0750 %{buildroot}%{_localstatedir}/log/puppet
 
 %{__install} -d -m0755  %{buildroot}%{_unitdir}
-install -Dp -m0644 ext/systemd/puppetagent.service %{buildroot}%{_unitdir}/puppetagent.service
+install -Dp -m0644 ext/systemd/puppet.service %{buildroot}%{_unitdir}/puppet.service
 install -Dp -m0644 ext/systemd/puppetmaster.service %{buildroot}%{_unitdir}/puppetmaster.service
 
 install -Dp -m0644 %{confdir}/fileserver.conf %{buildroot}%{_sysconfdir}/puppet/fileserver.conf
@@ -122,10 +104,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/modules
 %_pre_useradd puppet %{_localstatedir}/lib/%{name} /sbin/nologin 
 
 %post
-%_post_service puppetagent
+%_post_service puppet
 
 %preun
-%_preun_service puppetagent
+%_preun_service puppet
 
 
 %post server
@@ -140,7 +122,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/modules
 %{_bindir}/puppet
 %{_bindir}/extlookup2hiera
 %{puppet_libdir}/*
-%{_unitdir}/puppetagent.service
+%{_unitdir}/puppet.service
 %dir %{_sysconfdir}/puppet
 %dir %{_sysconfdir}/%{name}/modules
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
