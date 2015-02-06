@@ -4,7 +4,7 @@
 
 Name:		puppet
 Version:	3.4.3
-Release:	1
+Release:	2
 Summary:	System Automation and Configuration Management Software
 License:	Apache License v2
 Group:		Monitoring
