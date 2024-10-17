@@ -8,7 +8,7 @@ Release:	2
 Summary:	System Automation and Configuration Management Software
 License:	Apache License v2
 Group:		Monitoring
-URL:		http://www.puppetlabs.com/
+URL:		https://www.puppetlabs.com/
 Source0:	http://downloads.puppetlabs.com/puppet/%{name}-%{version}.tar.gz
 Source1:        http://downloads.puppetlabs.com/%{name}/%{name}-%{version}.tar.gz.asc
 Source2:        puppet-nm-dispatcher
